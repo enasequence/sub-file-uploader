@@ -1,0 +1,74 @@
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+apply plugin: 'idea'
+apply plugin: 'signing'
+apply plugin: 'war'
+
+group = 'uk.ac.ebi.webin-file-uploader'
+
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
+version = '1.0.0'
+//jarsigner -storetype pkcs12 -keystore ENA.p12 build/libs/webin-file-uploader-1.0.0.jar "european molecular biology laboratory's godaddy.com, inc. id"
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+repositories {
+    maven{ url "http://ves-ebi-de:8081/artifactory/gradle" }
+    mavenCentral()
+    mavenLocal()
+}
+
+jar {
+    from {
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+        configurations.runtime.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    manifest {
+        attributes  'Implementation-Title': 'webin-file-uploader',
+                    'Implementation-Version': '1.0.0',
+                    'Built-By': System.getProperty('user.name'),
+                    'Built-Date': new Date(),
+                    'Application-Name' : 'WebinUploader',
+                    'Main-Class': 'uk.ac.ebi.ena.webin.uploader.FileUploader',
+                    'Permissions': 'all-permissions',
+                    'Codebase': 'http://ves-hx-d0:8080/ena/upload'
+//                    'Codebase': 'http://localhost:8080/ena/upload'
+    }
+}
+
+war {
+    from 'build/libs/webin-file-uploader-1.0.0.jar'
+}
+
+dependencies {
+    compile(group: 'commons-net', name: 'commons-net', version: '3.0.1')
+    compile(group: 'com.google.guava', name: 'guava', version: '17.0')
+}
+
+task sourceJar(type: Jar) { from sourceSets.main.allJava }
+
+task wrapper(type: Wrapper) { gradleVersion = '2.2' }
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact sourceJar { classifier "sources" }
+        }
+    }
+    repositories {
+        maven {
+            credentials {
+                username 'admin'
+                password 'ena-artifactory'
+            }
+            url "http://ves-ebi-de:8081/artifactory/libs-release-local"
+        }
+    }
+}
