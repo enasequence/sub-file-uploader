@@ -15,66 +15,53 @@ import javax.swing.table.DefaultTableModel;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 
-public class FileUploader extends JFrame {
-    /*
-    public FileUploader() {
-        initUI();
-    }
-
-    public static void main(String... args) {
-        FileUploader ex = new FileUploader();
-        ex.setVisible(true);
-    }
-
-    private void initUI() {
-        setTitle("Simple example");
-        setSize(600, 400);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        JButton b = new JButton("click");
-        b.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
-            }
-        });
-        add(b);
-    }
-*/
-    private final String url = "webin.ebi.ac.uk";
+public class FileUploaderWebStart extends JFrame implements FileUploaderI {
+    private final static String MODE_UPLOAD = "upload";
+    private final static String MODE_MD5 = "md5";
+    private String server = "webin.ebi.ac.uk";
     private int port = 21;
+    private String mode = MODE_UPLOAD;
     private MyTableModel myTableModel = null;
     private FTPClient ftpClient = null;
     private List<String> nameL = new ArrayList();
     private List<String> sizeL = new ArrayList();
     private List<String> dateL = new ArrayList();
-    private TransferClient tr = null;
+    private TransferClient transferClient = null;
     private Thread trThread;
-    private Md5Client md5Client;
     private Thread md5Thread;
     private JButton jButton1;
     private JButton jButton2;
-    private JButton jButton3;
-    private JButton jButton4;
-    private JCheckBox jCheckBox1;
-    private JCheckBox jCheckBox2;
+    private JButton jButtonUpload;
+    private JCheckBox jCheckBoxOverwrite;
+    private JCheckBox jCheckBoxUploadTree;
     private JLabel jLabelUsername;
     private JLabel jLabelPassword;
     private JLabel jLabelUploadDir;
-    private JLabel jLabel4;
+    private JLabel jLabelStatus;
     private JPasswordField jPasswordField1;
-    private JProgressBar jProgressBar1;
+    private JProgressBar jProgressBar;
     private JScrollPane jScrollPane1;
     private JTable jTable1;
     private JTextField jTextField1;
     private JTextField jTextField2;
 
-    public FileUploader() {
+    public FileUploaderWebStart() {
+        init();
+    }
+
+    public FileUploaderWebStart(String server, String port, String mode) {
+        this.server = server;
+        this.port = Integer.valueOf(port);
+        this.mode = mode;
         init();
     }
 
     public static void main(String... args) {
-        FileUploader ex = new FileUploader();
+        FileUploaderWebStart ex = null;
+        if (args.length == 3)
+            ex = new FileUploaderWebStart(args[0], args[1], args[2]);
+        else
+            ex = new FileUploaderWebStart();
         ex.setVisible(true);
     }
 
@@ -88,9 +75,8 @@ public class FileUploader extends JFrame {
                 }
             }
         } catch (Exception e) {
-            Logger.getLogger(WebinFileUploader.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(FileUploaderApplet.class.getName()).log(Level.SEVERE, null, e);
         }
-        /* Create and display the applet */
         try {
             setTitle("Upload File(s)");
             setSize(1000, 600);
@@ -98,38 +84,21 @@ public class FileUploader extends JFrame {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        /* More Initialization */
         jTable1.setModel(new MyTableModel());
         myTableModel = (MyTableModel)jTable1.getModel(); // prepare, initialize table model
         jTable1.getColumnModel().getColumn(5).setCellRenderer(new ProgressCellRenderer());
         ftpClient = new FTPClient();
-        jLabel4.setText("");
-        String mode = "upload";
-        // TODO: take out!!!
-        String user = "Webin-41675";
-        if (mode != null && !mode.isEmpty()) {
-            if (mode.trim().equalsIgnoreCase("upload")) {
-                jButton4.setVisible(false);
-            } else if (mode.trim().equalsIgnoreCase("md5")) {
-                jLabelUsername.setVisible(false);
-                jTextField1.setVisible(false);
-                jLabelPassword.setVisible(false);
-                jPasswordField1.setVisible(false);
-                jButton3.setVisible(false);
-            }
-            jTextField1.setText(user);
-        }
-        // Hack for old server
-        jCheckBox1.setSelected(true);
+        jLabelStatus.setText("");
+        jCheckBoxOverwrite.setSelected(true);
         if (port == 8021)
-            jCheckBox1.setVisible(false);
+            jCheckBoxOverwrite.setVisible(false);
     }
 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
         jLabelUsername = new JLabel("Username");
-        jTextField1 = new JTextField("Password");
-        jLabelPassword = new JLabel();
+        jTextField1 = new JTextField();
+        jLabelPassword = new JLabel("Password");
         jPasswordField1 = new JPasswordField();
         jLabelUploadDir = new JLabel("Upload Directory");
         jTextField2 = new JTextField();
@@ -137,12 +106,11 @@ public class FileUploader extends JFrame {
         jScrollPane1 = new JScrollPane();
         jTable1 = new JTable();
         jButton2 = new JButton();
-        jCheckBox1 = new JCheckBox();
-        jCheckBox2 = new JCheckBox();
-        jProgressBar1 = new JProgressBar();
-        jButton3 = new JButton();
-        jButton4 = new JButton();
-        jLabel4 = new JLabel();
+        jCheckBoxOverwrite = new JCheckBox();
+        jCheckBoxUploadTree = new JCheckBox();
+        jProgressBar = new JProgressBar();
+        jButtonUpload = new JButton();
+        jLabelStatus = new JLabel();
         jButton1.setText("...");
         jButton1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -150,13 +118,13 @@ public class FileUploader extends JFrame {
             }
         });
         jTable1.setModel(new DefaultTableModel(
-                new Object [][] {
+                new Object[][]{
                         {null, null, null, null},
                         {null, null, null, null},
                         {null, null, null, null},
                         {null, null, null, null}
                 },
-                new String [] {
+                new String[]{
                         "Title 1", "Title 2", "Title 3", "Title 4"
                 }
         ));
@@ -172,27 +140,21 @@ public class FileUploader extends JFrame {
                 jButton2MouseClicked(evt);
             }
         });
-        jCheckBox1.setText("Overwrite");
-        jCheckBox2.setText("Upload Tree");
-        jCheckBox2.addMouseListener(new java.awt.event.MouseAdapter() {
+        jCheckBoxOverwrite.setText("Overwrite");
+        jCheckBoxUploadTree.setText("Upload Tree");
+        jCheckBoxUploadTree.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jCheckBox2MouseClicked(evt);
             }
         });
-        jButton3.setBackground(java.awt.Color.orange);
-        jButton3.setText("Upload");
-        jButton3.addMouseListener(new java.awt.event.MouseAdapter() {
+        jButtonUpload.setBackground(java.awt.Color.orange);
+        jButtonUpload.setText("Upload");
+        jButtonUpload.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jButton3MouseClicked(evt);
             }
         });
-        jButton4.setText("Only Create MD5 Files");
-        jButton4.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jButton4MouseClicked(evt);
-            }
-        });
-        jLabel4.setText("Status");
+        jLabelStatus.setText("Status");
         GroupLayout layout = new GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -200,7 +162,7 @@ public class FileUploader extends JFrame {
                         .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addContainerGap()
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                                        .addComponent(jProgressBar1, GroupLayout.Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(jProgressBar, GroupLayout.Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                         .addComponent(jScrollPane1, GroupLayout.Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 406, Short.MAX_VALUE)
                                         .addGroup(GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                                                 .addComponent(jLabelUploadDir)
@@ -211,11 +173,11 @@ public class FileUploader extends JFrame {
                                         .addGroup(GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                                                 .addComponent(jButton2, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)
                                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(jLabel4, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(jLabelStatus, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(jCheckBox1)
+                                                .addComponent(jCheckBoxOverwrite)
                                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(jCheckBox2)
+                                                .addComponent(jCheckBoxUploadTree)
                                                 .addGap(2, 2, 2))
                                         .addGroup(GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                                                 .addComponent(jLabelUsername)
@@ -226,9 +188,8 @@ public class FileUploader extends JFrame {
                                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(jPasswordField1, GroupLayout.PREFERRED_SIZE, 77, GroupLayout.PREFERRED_SIZE))
                                         .addGroup(layout.createSequentialGroup()
-                                                .addComponent(jButton3, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(jButton4, GroupLayout.PREFERRED_SIZE, 169, GroupLayout.PREFERRED_SIZE)))
+                                                .addComponent(jButtonUpload, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)))
                                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -250,35 +211,32 @@ public class FileUploader extends JFrame {
                                 .addGap(10, 10, 10)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(jButton2)
-                                        .addComponent(jCheckBox1)
-                                        .addComponent(jCheckBox2)
-                                        .addComponent(jLabel4))
+                                        .addComponent(jCheckBoxOverwrite)
+                                        .addComponent(jCheckBoxUploadTree)
+                                        .addComponent(jLabelStatus))
                                 .addGap(5, 5, 5)
-                                .addComponent(jProgressBar1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jProgressBar, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(jButton3)
-                                        .addComponent(jButton4))
+                                        .addComponent(jButtonUpload))
                                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
-
         final JFileChooser fc = new JFileChooser();
         fc.setMultiSelectionEnabled(true);
         fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
         int returnVal = fc.showOpenDialog(new JFrame());
         File sel = fc.getSelectedFile();
-        if (sel == null) return;
+        if (sel == null)
+            return;
         try {
             jTextField2.setFocusable(false);
             jTextField2.setText(sel.getAbsolutePath());
             jTextField2.setFocusable(true);
-
             dirChanged();
-            jButton3.requestFocus();
+            jButtonUpload.requestFocus();
         } catch (Throwable t) {
             System.out.println("Error jButton1Click: " + t.toString());
         }
@@ -296,19 +254,16 @@ public class FileUploader extends JFrame {
                 }
             }
         }
-
         // Select button
         if (selected.size() == jTable1.getRowCount()) {
             jButton2.setText("Select None");
         } else {
             jButton2.setText("Select All");
         }
-
         int[] num = new int[selected.size()];
         long totsize = 0;
-        for (int i = 0; i < num.length; i++) {
+        for (int i = 0; i < num.length; i++)
             totsize += Long.parseLong(selected.get(i).toString());
-        }
     }//GEN-LAST:event_jTable1MouseClicked
 
     private void jButton2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton2MouseClicked
@@ -316,57 +271,48 @@ public class FileUploader extends JFrame {
         boolean select = jButton2.getText().contains("Select All");
         for (int i = 0; i < jTable1.getRowCount(); i++) { // Prevent 'double' decryption
             String dl = myTableModel.getValueAt(i, 4).toString();
-            if (select) {
+            if (select)
                 myTableModel.setValueAt(true, i, 0);
-            } else {
+            else
                 myTableModel.setValueAt(false, i, 0);
-            }
         }
-        if (select) {
+        if (select)
             jButton2.setText("Select None");
-        } else {
+        else
             jButton2.setText("Select All");
-        }
-
         // Size Display
         ArrayList selected = new ArrayList();
         for (int i = 0; i < jTable1.getRowCount(); i++) {
-            if (Boolean.valueOf(myTableModel.getValueAt(i, 0).toString()) == true) {
+            if (Boolean.valueOf(myTableModel.getValueAt(i, 0).toString()) == true)
                 selected.add(sizeL.get(i).toString());
-            }
         }
-
         int[] num = new int[selected.size()];
         long totsize = 0;
-        for (int i = 0; i < num.length; i++) {
+        for (int i = 0; i < num.length; i++)
             totsize += Long.parseLong(selected.get(i).toString());
-        }
     }//GEN-LAST:event_jButton2MouseClicked
 
     private void jButton3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton3MouseClicked
         // Handle 'cancel' mode:
-        if (jButton3.getText().equalsIgnoreCase("Cancel Upload")) {
+        if (jButtonUpload.getText().equalsIgnoreCase("Cancel Upload")) {
             trThread.stop();
             trThread = null;
-            jButton3.setText("Upload");
+            jButtonUpload.setText("Upload");
             return;
         }
-
         jLabelUploadDir.setText("Upload Selected");
-
         // Upload Code
         if (jTextField1.getText().length() == 0 || jPasswordField1.getPassword().length == 0) {
             JOptionPane.showMessageDialog(this, "Provide Username and Password!", "User Credentials Missing", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        jLabel4.setText("Upload Selected");
-
+        jLabelStatus.setText("Upload Selected");
         boolean login = false;
         try {
-            ftpClient.connect(url, port);
+            ftpClient.connect(server, port);
             login = ftpClient.login(jTextField1.getText(), new String(jPasswordField1.getPassword()));
         } catch (IOException ex) {
-            Logger.getLogger(WebinFileUploader.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FileUploaderApplet.class.getName()).log(Level.SEVERE, null, ex);
         }
         if (!login) {
             JOptionPane.showMessageDialog(this, "Login Incorrect!", "User Credentials Incorrect", JOptionPane.ERROR_MESSAGE);
@@ -376,9 +322,8 @@ public class FileUploader extends JFrame {
         try {
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
         } catch (IOException ex) {
-            Logger.getLogger(WebinFileUploader.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FileUploaderApplet.class.getName()).log(Level.SEVERE, null, ex);
         }
-
         // Get files to be uploaded (this with check box)
         String path = jTextField2.getText();
         File f = new File(path);
@@ -386,16 +331,14 @@ public class FileUploader extends JFrame {
             path = f.getCanonicalPath();
             path = path.substring(0, path.length());
         } catch (IOException ex) {
-            Logger.getLogger(WebinFileUploader.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FileUploaderApplet.class.getName()).log(Level.SEVERE, null, ex);
         }
-
         ArrayList selectedForUpload = new ArrayList(), dlSizes = new ArrayList(), sIn = new ArrayList();
         for (int i = 0; i < myTableModel.getRowCount(); i++) {
             if (Boolean.valueOf(myTableModel.getValueAt(i, 0).toString()) == true) { // If selected ...
                 String name = nameL.get(i).toString();
-                if (jCheckBox2.isSelected()) {
+                if (jCheckBoxUploadTree.isSelected())
                     name = name.substring(name.indexOf(File.separator) + 1);
-                }
                 selectedForUpload.add(path + File.separator + name); //nameL.get(i).toString()); // Entire Path!
                 dlSizes.add(sizeL.get(i).toString()); // File Size of selected file
                 sIn.add(String.valueOf(i)); // Index of selected file
@@ -405,8 +348,7 @@ public class FileUploader extends JFrame {
             JOptionPane.showMessageDialog(this, "Select at least 1 file for upload.", "Entry Missing", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
-        // Upload each file, by spawning a transfer client
+        // Upload each file, by spawning a transfer ftpClient
         String[] to_download = new String[selectedForUpload.size()];
         long[] dl_size = new long[dlSizes.size()];
         int[] selectedIndices = new int[sIn.size()];
@@ -415,107 +357,32 @@ public class FileUploader extends JFrame {
             dl_size[i] = Long.parseLong(dlSizes.get(i).toString());
             selectedIndices[i] = Integer.parseInt(sIn.get(i).toString());
         }
-
         // Now that upload is about to commence, display overall progress bar
-        jProgressBar1.setVisible(true);
+        jProgressBar.setVisible(true);
         jLabelUsername.setVisible(true);
-
         // Hand off upload information to Transfer Client thread
-        tr = new TransferClient(jProgressBar1, to_download, dl_size, selectedIndices, this, path, ftpClient);
-
+        transferClient = new TransferClient(to_download, dl_size, selectedIndices, this, path, ftpClient);
         // And run...
-        trThread = new Thread(tr);
+        trThread = new Thread(transferClient);
         trThread.start();
-        jLabel4.setText("Upload Process Started.");
-
+        jLabelStatus.setText("Upload Process Started.");
         // Add 'Cancel' Option
-        jButton3.setText("Cancel Upload");
-        jButton3.setEnabled(true);
+        jButtonUpload.setText("Cancel Upload");
+        jButtonUpload.setEnabled(true);
     }//GEN-LAST:event_jButton3MouseClicked
 
-    private void jButton4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton4MouseClicked
-        // Handle 'cancel' mode:
-        if (jButton4.getText().equalsIgnoreCase("Cancel Calculation")) {
-            md5Thread.stop();
-            md5Thread = null;
-            jButton4.setText("Only Create MD5 Files");
-            return;
-        }
-
-        jLabel4.setText("MD5 Calculation Selected");
-
-        // Create obly MD5 files (e.g. to upload via Aspera later)
-        // Get files to be uploaded (this with check box)
-        String path = jTextField2.getText();
-        File f = new File(path);
-        try {
-            path = f.getCanonicalPath();
-            path = path.substring(0, path.length());
-        } catch (IOException ex) {
-            Logger.getLogger(WebinFileUploader.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        ArrayList selectedForUpload = new ArrayList(), dlSizes = new ArrayList(), sIn = new ArrayList();
-        for (int i = 0; i < myTableModel.getRowCount(); i++) {
-            if (Boolean.valueOf(myTableModel.getValueAt(i, 0).toString()) == true) { // If selected ...
-                String name = nameL.get(i).toString();
-                if (jCheckBox2.isSelected()) {
-                    name = name.substring(name.indexOf(File.separator) + 1);
-                }
-                selectedForUpload.add(path + File.separator + name); // Entire Path!
-                dlSizes.add(sizeL.get(i).toString()); // File Size of selected file
-                sIn.add(String.valueOf(i)); // Index of selected file
-            }
-        }
-        if (selectedForUpload.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Select at least 1 file to generate MD5 files.", "Entry Missing", JOptionPane.ERROR_MESSAGE);
-            jLabel4.setText("");
-            return;
-        }
-
-        // Upload each file, by spawning a transfer client
-        String[] to_download = new String[selectedForUpload.size()];
-        long[] dl_size = new long[dlSizes.size()];
-        int[] selectedIndices = new int[sIn.size()];
-        for (int i = 0; i < selectedForUpload.size(); i++) { // download each file individually
-            to_download[i] = selectedForUpload.get(i).toString();
-            dl_size[i] = Long.parseLong(dlSizes.get(i).toString());
-            selectedIndices[i] = Integer.parseInt(sIn.get(i).toString());
-        }
-
-        // Now that upload is about to commence, display overall progress bar
-        jProgressBar1.setVisible(true);
-
-        // Hand off upload information to Transfer Client thread
-        md5Client = new Md5Client(jProgressBar1, to_download, dl_size, selectedIndices, this, path);
-
-        // And run...
-        md5Thread = new Thread(md5Client);
-        md5Thread.start();
-        jLabel4.setText("MD5 Calculation Process Started.");
-
-        // Add 'Cancel' Option
-        jButton4.setText("Cancel Calculation");
-        jButton4.setEnabled(true);
-    }//GEN-LAST:event_jButton4MouseClicked
-
     private void jCheckBox2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jCheckBox2MouseClicked
-        if (jTextField2.getText().length() > 0) {
+        if (jTextField2.getText().length() > 0)
             dirChanged();
-        }
     }//GEN-LAST:event_jCheckBox2MouseClicked
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private void dirChanged() { // Update table content upon directory change
-
-        boolean dirs = jCheckBox2.isSelected(); // Upload dir structure -- display all subfolders + partial path
-
+        boolean dirs = jCheckBoxUploadTree.isSelected(); // Upload dir structure -- display all subfolders + partial path
         String dir_text = jTextField2.getText();
         nameL = new ArrayList(); sizeL = new ArrayList(); dateL = new ArrayList();
-        if (dir_text.length() <= 0) {
+        if (dir_text.length() <= 0)
             return; // No dir selected
-        }
-
         File dir = new File(dir_text);
         if (!dir.exists()) {
             Object[][] the_data = {{false, "", "", "", "", ""}};
@@ -523,7 +390,6 @@ public class FileUploader extends JFrame {
             JOptionPane.showMessageDialog(this, dir_text + " does not exist.", "File Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
         //File[] allfiles = dir.listFiles();
         FilenameFilter ff = new FilenameFilter() {
             @Override
@@ -536,21 +402,19 @@ public class FileUploader extends JFrame {
                     String str = name.substring(lastIndex);
                     // match path nameL extension
                     if(!str.equals(".md5") && !str.endsWith("~"))
-                    {
                         return true;
-                    }
                 } else
                     return true;
                 return false;
             }
-        };        File[] allfiles = listFilesAsArray(dir, ff, dirs);
+        };
+        File[] allfiles = listFilesAsArray(dir, ff, dirs);
         if (allfiles.length == 0) {
             Object[][] the_data = {{false, "", "", "", "", ""}};
             myTableModel.setData(the_data);
             JOptionPane.showMessageDialog(this, dir_text + " is empty.", "File Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
         String loc_path = dir.getAbsolutePath();
         int idx = loc_path.lastIndexOf(File.separatorChar);
         if (idx >= 0)
@@ -561,17 +425,14 @@ public class FileUploader extends JFrame {
                 tmp_name = allfiles[i].getAbsolutePath();
                 idx = tmp_name.indexOf(loc_path);
                 tmp_name = tmp_name.substring(idx);
-            } else { // Display just file nameL
+            } else // Display just file nameL
                 tmp_name = allfiles[i].getName();
-            }
-
-            if (!allfiles[i].isDirectory()) { // don't actually add plain directories to the list
+            if (!allfiles[i].isDirectory()) { // don'fileUploader actually add plain directories to the list
                 nameL.add(tmp_name);
                 sizeL.add(String.valueOf(allfiles[i].length()));
                 dateL.add(String.valueOf(allfiles[i].lastModified()));
             }
         }
-
         // List files in table
         DateFormat df = new SimpleDateFormat("dd-MMM-yyyy");
         df.setTimeZone(TimeZone.getTimeZone("Europe/London"));
@@ -584,15 +445,12 @@ public class FileUploader extends JFrame {
             the_data[i][4] = "";
             the_data[i][5] = "0%";
         }
-
         myTableModel.setData(the_data);
-
         jButton2.setText("Select All");
     }
 
     public File[] listFilesAsArray(File directory, FilenameFilter filter, boolean recurse) {
         Collection<File> files = listFiles(directory, filter, recurse);
-
         File[] arr = new File[files.size()];
         return files.toArray(arr);
     }
@@ -600,25 +458,17 @@ public class FileUploader extends JFrame {
     public Collection<File> listFiles(File directory, FilenameFilter filter, boolean recurse) {
         // List of files / directories
         Vector<File> files = new Vector<File>();
-
         // Get files / directories in the directory
         File[] entries = directory.listFiles();
-
         // Go over entries
-        for (File entry : entries)
-        {
-            if (filter == null || filter.accept(directory, entry.getName()))
-            {
+        for (File entry : entries) {
+            if (filter == null || filter.accept(directory, entry.getName())) {
                 if (!entry.isHidden())
                     files.add(entry);
             }
-
             if (recurse && entry.isDirectory() && !entry.isHidden())
-            {
                 files.addAll(listFiles(entry, filter, recurse));
-            }
         }
-
         // Return collection of files
         return files;
     }
@@ -626,11 +476,10 @@ public class FileUploader extends JFrame {
     private String size_display(long in) {
         String result = "";
         DecimalFormat df = new DecimalFormat("#,##0.00");
-
         double in_format = 0;
-        if (in < 1024) {
+        if (in < 1024)
             result = in + " Bytes";
-        } else if (in < Math.pow(1024, 2)) {
+        else if (in < Math.pow(1024, 2)) {
             in_format = (in/Math.pow(1024, 1));
             result = df.format(in_format) + " KB";
         } else if (in < Math.pow(1024, 3)) {
@@ -646,10 +495,10 @@ public class FileUploader extends JFrame {
             in_format = (in/Math.pow(1024, 5));
             result = df.format(in_format) + " PB";
         }
-
         return result;
     }
 
+    @Override
     public void deactivate() {
         jLabelUsername.setEnabled(false);
         jTextField1.setEnabled(false);
@@ -660,14 +509,14 @@ public class FileUploader extends JFrame {
         jButton1.setEnabled(false);
         jTable1.setEnabled(false);
         jButton2.setEnabled(false);
-        jLabel4.setEnabled(false);
-        jCheckBox1.setEnabled(false);
-        jCheckBox2.setEnabled(false);
-        if (!jButton3.getText().contains("Cancel"))
-            jButton3.setEnabled(false);
-        if (!jButton4.getText().contains("Cancel"))
-            jButton4.setEnabled(false);
+        jLabelStatus.setEnabled(false);
+        jCheckBoxOverwrite.setEnabled(false);
+        jCheckBoxUploadTree.setEnabled(false);
+        if (!jButtonUpload.getText().contains("Cancel"))
+            jButtonUpload.setEnabled(false);
     }
+
+    @Override
     public void activate() {
         jLabelUsername.setEnabled(true);
         jTextField1.setEnabled(true);
@@ -678,41 +527,40 @@ public class FileUploader extends JFrame {
         jButton1.setEnabled(true);
         jTable1.setEnabled(true);
         jButton2.setEnabled(true);
-        jLabel4.setEnabled(true);
-        jCheckBox1.setEnabled(true);
-        jCheckBox2.setEnabled(true);
-        jButton3.setEnabled(true);
-        jButton4.setEnabled(true);
+        jLabelStatus.setEnabled(true);
+        jCheckBoxOverwrite.setEnabled(true);
+        jCheckBoxUploadTree.setEnabled(true);
+        jButtonUpload.setEnabled(true);
     }
 
+    @Override
     public boolean isTree() {
-        return jCheckBox2.isSelected();
+        return jCheckBoxUploadTree.isSelected();
     }
 
+    @Override
     public boolean isOverwrite() {
-        return jCheckBox1.isSelected();
+        return jCheckBoxOverwrite.isSelected();
     }
 
+    @Override
     public void setButtonText(String text, int idx) {
         if (idx == 0)
-            jButton3.setText(text);
-        else if (idx == 1)
-            jButton4.setText(text);
+            jButtonUpload.setText(text);
     }
 
+    @Override
     public MyTableModel getTable() {
         return myTableModel;
     }
 
+    @Override
     public void setStatusText(String text) {
-        jLabel4.setText(text);
+        jLabelStatus.setText(text);
     }
 
-    public String getU() {
-        return jTextField1.getText();
-    }
-
-    public char[] getP() {
-        return jPasswordField1.getPassword();
+    @Override
+    public JProgressBar getJProgressBar() {
+        return jProgressBar;
     }
 }

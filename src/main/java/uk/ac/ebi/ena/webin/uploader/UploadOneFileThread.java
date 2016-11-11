@@ -50,7 +50,7 @@ public class UploadOneFileThread extends Thread {
 //            if (binary)
                 this.client.setFileType(FTP.BINARY_FILE_TYPE);
 //            else
-//                this.client.setFileType(FTP.ASCII_FILE_TYPE);
+//                this.ftpClient.setFileType(FTP.ASCII_FILE_TYPE);
             storeFile = this.client.storeFile(filename, c_in);
             c_in.close();
         } catch (IOException ex) {

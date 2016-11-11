@@ -28,9 +28,8 @@ import java.util.TimeZone;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
+import javax.swing.*;
+
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 
@@ -38,32 +37,27 @@ import org.apache.commons.net.ftp.FTPClient;
  *
  * @author Alexander Senf
  */
-public class WebinFileUploader extends javax.swing.JApplet {
+public class FileUploaderApplet extends javax.swing.JApplet implements FileUploaderI {
     private final String version = "0.9.5";
-    
     private String the_addr = "webin.ebi.ac.uk";
     private int the_port = 21;
-    
     private MyTableModel the_model = null;
     private FTPClient the_client = null;
-
     private ArrayList name = new ArrayList();
     private ArrayList size = new ArrayList();
     private ArrayList date = new ArrayList();
-    
     private TransferClient tr = null;
     private Thread tr_t = null;
-    private Md5Client m5 = null;
     private Thread m5_t = null;
 
-    public static void main(String [ ] args) {
-        WebinFileUploader downloader = new WebinFileUploader();
+    public static void main(String... args) {
+        FileUploaderApplet downloader = new FileUploaderApplet();
         downloader.init();
         downloader.start();
     }
 
     /**
-     * Initializes the applet WebinFileUploader
+     * Initializes the applet FileUploaderApplet
      */
     @Override
     public void init() {
@@ -80,13 +74,13 @@ public class WebinFileUploader extends javax.swing.JApplet {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(WebinFileUploader.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FileUploaderApplet.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(WebinFileUploader.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FileUploaderApplet.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(WebinFileUploader.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FileUploaderApplet.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(WebinFileUploader.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FileUploaderApplet.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
@@ -121,18 +115,6 @@ public class WebinFileUploader extends javax.swing.JApplet {
             }
         }
         String mode = getParameter("mode");
-        if (mode!=null && mode.length()>0) {
-            if (mode.trim().equalsIgnoreCase("upload")) {
-                this.jButton4.setVisible(false);
-            } else if (mode.trim().equalsIgnoreCase("md5")) {
-                this.jLabel1.setVisible(false);
-                this.jTextField1.setVisible(false);
-                this.jLabel2.setVisible(false);
-                this.jPasswordField1.setVisible(false);
-                this.jButton3.setVisible(false);
-            }
-        }
-
         String user = getParameter("user");
         if (null != user)
             user.trim();
@@ -171,9 +153,8 @@ public class WebinFileUploader extends javax.swing.JApplet {
         jButton2 = new javax.swing.JButton();
         jCheckBox1 = new javax.swing.JCheckBox();
         jCheckBox2 = new javax.swing.JCheckBox();
-        jProgressBar1 = new javax.swing.JProgressBar();
+        jProgressBar = new javax.swing.JProgressBar();
         jButton3 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
 
         jLabel1.setText("Username");
@@ -230,14 +211,6 @@ public class WebinFileUploader extends javax.swing.JApplet {
                 jButton3MouseClicked(evt);
             }
         });
-
-        jButton4.setText("Only Create MD5 Files");
-        jButton4.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jButton4MouseClicked(evt);
-            }
-        });
-
         jLabel4.setText("Status");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -247,7 +220,7 @@ public class WebinFileUploader extends javax.swing.JApplet {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jProgressBar1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jProgressBar, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 406, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addComponent(jLabel3)
@@ -274,8 +247,7 @@ public class WebinFileUploader extends javax.swing.JApplet {
                         .addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -301,11 +273,10 @@ public class WebinFileUploader extends javax.swing.JApplet {
                     .addComponent(jCheckBox2)
                     .addComponent(jLabel4))
                 .addGap(5, 5, 5)
-                .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton3)
-                    .addComponent(jButton4))
+                    .addComponent(jButton3))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -413,7 +384,7 @@ public class WebinFileUploader extends javax.swing.JApplet {
             this.the_client.connect(the_addr, the_port);
             login = this.the_client.login(this.jTextField1.getText(), new String(this.jPasswordField1.getPassword()));
         } catch (IOException ex) {
-            Logger.getLogger(WebinFileUploader.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FileUploaderApplet.class.getName()).log(Level.SEVERE, null, ex);
         }
         if (!login) {
             JOptionPane.showMessageDialog(this, "Login Incorrect!", "User Credentials Incorrect", JOptionPane.ERROR_MESSAGE);
@@ -423,7 +394,7 @@ public class WebinFileUploader extends javax.swing.JApplet {
         try {
             this.the_client.setFileType(FTP.BINARY_FILE_TYPE);
         } catch (IOException ex) {
-            Logger.getLogger(WebinFileUploader.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FileUploaderApplet.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         // Get files to be uploaded (this with check box)
@@ -433,7 +404,7 @@ public class WebinFileUploader extends javax.swing.JApplet {
             path = f.getCanonicalPath();
             path = path.substring(0, path.length());
         } catch (IOException ex) {
-            Logger.getLogger(WebinFileUploader.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FileUploaderApplet.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         ArrayList selectedForUpload = new ArrayList(), dlSizes = new ArrayList(), sIn = new ArrayList();
@@ -453,7 +424,7 @@ public class WebinFileUploader extends javax.swing.JApplet {
             return;
         }
 
-        // Upload each file, by spawning a transfer client
+        // Upload each file, by spawning a transfer ftpClient
         String[] to_download = new String[selectedForUpload.size()];
         long[] dl_size = new long[dlSizes.size()];
         int[] selectedIndices = new int[sIn.size()];
@@ -464,11 +435,11 @@ public class WebinFileUploader extends javax.swing.JApplet {
         }
 
         // Now that upload is about to commence, display overall progress bar
-        this.jProgressBar1.setVisible(true);
+        this.jProgressBar.setVisible(true);
         this.jLabel1.setVisible(true);
 
         // Hand off upload information to Transfer Client thread
-        this.tr = new TransferClient(this.jProgressBar1, to_download, dl_size, selectedIndices, this, path, this.the_client);
+        this.tr = new TransferClient(to_download, dl_size, selectedIndices, this, path, this.the_client);
 
         // And run...
         this.tr_t = new Thread(this.tr);
@@ -479,72 +450,6 @@ public class WebinFileUploader extends javax.swing.JApplet {
         this.jButton3.setText("Cancel Upload");
         this.jButton3.setEnabled(true);
     }//GEN-LAST:event_jButton3MouseClicked
-
-    private void jButton4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton4MouseClicked
-         // Handle 'cancel' mode:
-        if (this.jButton4.getText().equalsIgnoreCase("Cancel Calculation")) {
-            this.m5_t.stop();
-            this.m5_t = null;
-            this.jButton4.setText("Only Create MD5 Files");
-            return;
-        }
-        
-       this.jLabel4.setText("MD5 Calculation Selected");
-        
-        // Create obly MD5 files (e.g. to upload via Aspera later)
-        // Get files to be uploaded (this with check box)
-        String path = this.jTextField2.getText();
-        File f = new File(path);
-        try {
-            path = f.getCanonicalPath();
-            path = path.substring(0, path.length());
-        } catch (IOException ex) {
-            Logger.getLogger(WebinFileUploader.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        ArrayList selectedForUpload = new ArrayList(), dlSizes = new ArrayList(), sIn = new ArrayList();
-        for (int i = 0; i < the_model.getRowCount(); i++) {
-            if (Boolean.valueOf(the_model.getValueAt(i, 0).toString()) == true) { // If selected ...
-                String name = this.name.get(i).toString();
-                if (this.jCheckBox2.isSelected()) {
-                    name = name.substring(name.indexOf(File.separator) + 1);
-                }
-                selectedForUpload.add(path + File.separator + name); // Entire Path!
-                dlSizes.add(this.size.get(i).toString()); // File Size of selected file
-                sIn.add(String.valueOf(i)); // Index of selected file
-            }
-        }
-        if (selectedForUpload.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Select at least 1 file to generate MD5 files.", "Entry Missing", JOptionPane.ERROR_MESSAGE);
-            this.jLabel4.setText("");
-            return;
-        }
-
-        // Upload each file, by spawning a transfer client
-        String[] to_download = new String[selectedForUpload.size()];
-        long[] dl_size = new long[dlSizes.size()];
-        int[] selectedIndices = new int[sIn.size()];
-        for (int i = 0; i < selectedForUpload.size(); i++) { // download each file individually
-            to_download[i] = selectedForUpload.get(i).toString();
-            dl_size[i] = Long.parseLong(dlSizes.get(i).toString());
-            selectedIndices[i] = Integer.parseInt(sIn.get(i).toString());
-        }
-
-        // Now that upload is about to commence, display overall progress bar
-        this.jProgressBar1.setVisible(true);
-
-        // Hand off upload information to Transfer Client thread
-        this.m5 = new Md5Client(this.jProgressBar1, to_download, dl_size, selectedIndices, this, path);
-
-        // And run...
-        this.m5_t = new Thread(this.m5);
-        this.m5_t.start();
-        this.jLabel4.setText("MD5 Calculation Process Started.");
-        
-        // Add 'Cancel' Option
-        this.jButton4.setText("Cancel Calculation");
-        this.jButton4.setEnabled(true);
-    }//GEN-LAST:event_jButton4MouseClicked
 
     private void jCheckBox2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jCheckBox2MouseClicked
         if (this.jTextField2.getText().length() > 0) {
@@ -557,7 +462,6 @@ public class WebinFileUploader extends javax.swing.JApplet {
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
     private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JCheckBox jCheckBox2;
     private javax.swing.JLabel jLabel1;
@@ -565,7 +469,7 @@ public class WebinFileUploader extends javax.swing.JApplet {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JPasswordField jPasswordField1;
-    private javax.swing.JProgressBar jProgressBar1;
+    private javax.swing.JProgressBar jProgressBar;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
     private javax.swing.JTextField jTextField1;
@@ -631,7 +535,7 @@ public class WebinFileUploader extends javax.swing.JApplet {
                 tmp_name = allfiles[i].getName();
             }
 
-            if (!allfiles[i].isDirectory()) { // don't actually add plain directories to the list
+            if (!allfiles[i].isDirectory()) { // don'fileUploader actually add plain directories to the list
                 this.name.add(tmp_name);
                 this.size.add(String.valueOf(allfiles[i].length()));
                 this.date.add(String.valueOf(allfiles[i].lastModified()));
@@ -664,29 +568,29 @@ public class WebinFileUploader extends javax.swing.JApplet {
     }
 
     public Collection<File> listFiles(File directory, FilenameFilter filter, boolean recurse) {
-	// List of files / directories
-	Vector<File> files = new Vector<File>();
-	
-	// Get files / directories in the directory
-	File[] entries = directory.listFiles();
-	
-	// Go over entries
-	for (File entry : entries)
-	{
-		if (filter == null || filter.accept(directory, entry.getName()))
-		{
-                        if (!entry.isHidden())
-                            files.add(entry);
-		}
-		
-		if (recurse && entry.isDirectory() && !entry.isHidden())
-		{
-			files.addAll(listFiles(entry, filter, recurse));
-		}
-	}
-	
-	// Return collection of files
-	return files;		
+        // List of files / directories
+        Vector<File> files = new Vector<File>();
+
+        // Get files / directories in the directory
+        File[] entries = directory.listFiles();
+
+        // Go over entries
+        for (File entry : entries)
+        {
+            if (filter == null || filter.accept(directory, entry.getName()))
+            {
+                            if (!entry.isHidden())
+                                files.add(entry);
+            }
+
+            if (recurse && entry.isDirectory() && !entry.isHidden())
+            {
+                files.addAll(listFiles(entry, filter, recurse));
+            }
+        }
+
+        // Return collection of files
+        return files;
     }
     
     private String size_display(long in) {
@@ -715,7 +619,8 @@ public class WebinFileUploader extends javax.swing.JApplet {
         
         return result;
     }
-    
+
+    @Override
     public void deactivate() {
         this.jLabel1.setEnabled(false);
         this.jTextField1.setEnabled(false);
@@ -730,8 +635,9 @@ public class WebinFileUploader extends javax.swing.JApplet {
         this.jCheckBox1.setEnabled(false);
         this.jCheckBox2.setEnabled(false);
         if (!this.jButton3.getText().contains("Cancel")) this.jButton3.setEnabled(false);
-        if (!this.jButton4.getText().contains("Cancel")) this.jButton4.setEnabled(false);
     }
+
+    @Override
     public void activate() {
         this.jLabel1.setEnabled(true);
         this.jTextField1.setEnabled(true);
@@ -746,7 +652,6 @@ public class WebinFileUploader extends javax.swing.JApplet {
         this.jCheckBox1.setEnabled(true);
         this.jCheckBox2.setEnabled(true);
         this.jButton3.setEnabled(true);
-        this.jButton4.setEnabled(true);
     }
     
     public boolean isTree() {
@@ -756,27 +661,33 @@ public class WebinFileUploader extends javax.swing.JApplet {
     public boolean isOverwrite() {
         return this.jCheckBox1.isSelected();
     }
-    
+
+    @Override
     public void setButtonText(String text, int idx) {
         if (idx == 0)
             this.jButton3.setText(text);
-        else if (idx == 1)
-            this.jButton4.setText(text);
     }
-    
+
+    @Override
     public MyTableModel getTable() {
         return this.the_model;
     }
-    
+
+    @Override
     public void setStatusText(String text) {
         this.jLabel4.setText(text);
     }
-    
+
     public String getU() {
         return this.jTextField1.getText();
     }
     
     public char[] getP() {
         return this.jPasswordField1.getPassword();
+    }
+
+    @Override
+    public JProgressBar getJProgressBar() {
+        return jProgressBar;
     }
 }
