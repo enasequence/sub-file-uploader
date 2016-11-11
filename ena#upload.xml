@@ -1,2 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<Context docBase="${catalina.base}/deploy/webin-file-uploader-1.0.0.war"></Context>
+<!--
+<Context docBase="${catalina.base}/deploy/webin-file-uploader-1.0.0.war"></Context><?xml version='1.0' encoding='utf-8'?>
+-->
+<Context docBase="/Users/cleland/git/webin-file-uploader/build/libs/webin-file-uploader-1.0.0.war"></Context>

@@ -1,3 +1,3 @@
 Manifest-Version: 1.0
-Main-Class: uk.ac.ebi.ena.webin.uploader.WebinFileUploader
+Main-Class: uk.ac.ebi.ena.webin.uploader.FileUploaderApplet
 
