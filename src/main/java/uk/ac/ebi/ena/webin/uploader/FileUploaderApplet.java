@@ -38,7 +38,6 @@ import org.apache.commons.net.ftp.FTPClient;
  * @author Alexander Senf
  */
 public class FileUploaderApplet extends javax.swing.JApplet implements FileUploaderI {
-    //TESTING 123...
     private final String version = "0.9.5";
     private String the_addr = "webin.ebi.ac.uk";
     private int the_port = 21;
