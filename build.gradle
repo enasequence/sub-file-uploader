@@ -9,9 +9,9 @@ group = 'uk.ac.ebi.webin-file-uploader'
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 
-version = '1.0.0'
-//jarsigner -storetype pkcs12 -keystore ENA.p12 build/libs/webin-file-uploader-1.0.0.jar "european molecular biology laboratory's godaddy.com, inc. id"
-// jarsigner -storetype pkcs12 -keystore ENA-2016.p12 build/libs/webin-file-uploader-1.0.0.jar "1"
+version = '1.0.1'
+//jarsigner -storetype pkcs12 -keystore ENA.p12 build/libs/webin-file-uploader-1.0.1.jar "european molecular biology laboratory's godaddy.com, inc. id"
+// jarsigner -storetype pkcs12 -keystore ENA-2016.p12 build/libs/webin-file-uploader-1.0.1.jar "1"
 //pass1234
 // codesign -f -s "Mac Developer: Iain Cleland (J4BA848P6H)" sclear
 // certutil
@@ -21,7 +21,7 @@ configurations.all {
     resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
 repositories {
-    maven{ url "http://ves-ebi-de:8081/artifactory/gradle" }
+    maven{ url "http://ena-dev:8081/artifactory/all" }
     mavenCentral()
     mavenLocal()
 }
@@ -37,20 +37,20 @@ jar {
     }
     manifest {
         attributes  'Implementation-Title': 'webin-file-uploader',
-                    'Implementation-Version': '1.0.0',
+                    'Implementation-Version': version,
                     'Built-By': System.getProperty('user.name'),
                     'Built-Date': new Date(),
                     'Application-Name' : 'Webin Uploader',
                     'Main-Class': 'uk.ac.ebi.ena.webin.uploader.FileUploaderWebStart',
                     'Permissions': 'all-permissions',
-                    'Codebase': 'http://www.ebi.ac.uk/ena/upload'
+                    'Codebase': 'https://www.ebi.ac.uk/ena/upload'
 //                    'Codebase': 'http://ves-hx-5a:8160/ena/upload'
 //                    'Codebase': 'http://localhost:8080/ena/upload'
     }
 }
 
 war {
-    from 'build/libs/webin-file-uploader-1.0.0.jar'
+    from 'build/libs/webin-file-uploader-1.0.1.jar'
 }
 
 dependencies {
@@ -72,8 +72,8 @@ publishing {
     repositories {
         maven {
             credentials {
-                username System.getenv("ARTIFACTORY_USERNAME")
-                password System.getenv("ARTIFACTORY_PASSWORD")
+                username artifactoryUsername
+                password artifactoryPassword
             }
             url "http://ves-ebi-de:8081/artifactory/libs-release-local"
         }
