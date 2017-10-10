@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jnlp spec="1.0+" codebase="http://www.ebi.ac.uk/ena/upload" href="WebinUploader.jnlp">
+<jnlp spec="1.0+" codebase="https://www.ebi.ac.uk/ena/upload" href="WebinUploader.jnlp">
     <!--
     <jnlp spec="1.0+" codebase="http://localhost:8080/ena/upload" href="WebinUploader.jnlp">
     <jnlp spec="1.0+" codebase="http://ves-hx-5a:8160/ena/upload" href="WebinUploader.jnlp">
