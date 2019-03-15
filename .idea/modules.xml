@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/webin-file-uploader.iml" filepath="$PROJECT_DIR$/webin-file-uploader.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/sub-file-uploader.iml" filepath="$PROJECT_DIR$/.idea/sub-file-uploader.iml" />
     </modules>
   </component>
 </project>
