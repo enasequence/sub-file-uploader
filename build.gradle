@@ -9,7 +9,9 @@ group = 'uk.ac.ebi.webin-file-uploader'
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 
-version = '1.0.1'
+version = '1.0.2'
+ext.gitlab_project_id ='1010'
+
 //jarsigner -storetype pkcs12 -keystore ENA.p12 build/libs/webin-file-uploader-1.0.1.jar "european molecular biology laboratory's godaddy.com, inc. id"
 // jarsigner -storetype pkcs12 -keystore ENA-2016.p12 build/libs/webin-file-uploader-1.0.1.jar "1"
 //pass1234
@@ -17,14 +19,31 @@ version = '1.0.1'
 // certutil
 // rc/main/webapp/WebinUploader.jnlp
 
-configurations.all {
-    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+
+wrapper{
+    gradleVersion = '5.2.1'
 }
+
+
 repositories {
-    maven{ url "http://ena-dev:8081/artifactory/all" }
-    mavenCentral()
     mavenLocal()
+
+    maven {
+        // Group level (enasequence) maven artifactory.
+        url "https://gitlab.ebi.ac.uk/api/v4/groups/enasequence/-/packages/maven"
+
+        credentials(HttpHeaderCredentials) {
+            name = "Private-Token"
+            value = project.ext.properties.gitlab_private_token
+        }
+        authentication {
+            header( HttpHeaderAuthentication )
+        }
+
+    }    
+    mavenCentral()
 }
+
 
 jar {
     from {
@@ -36,16 +55,12 @@ jar {
         }
     }
     manifest {
-        attributes  'Implementation-Title': 'webin-file-uploader',
-                    'Implementation-Version': version,
-                    'Built-By': System.getProperty('user.name'),
-                    'Built-Date': new Date(),
-                    'Application-Name' : 'Webin Uploader',
-                    'Main-Class': 'uk.ac.ebi.ena.webin.uploader.FileUploaderWebStart',
-                    'Permissions': 'all-permissions',
-                    'Codebase': 'https://www.ebi.ac.uk/ena/upload'
-//                    'Codebase': 'http://ves-hx-5a:8160/ena/upload'
-//                    'Codebase': 'http://localhost:8080/ena/upload'
+        attributes(
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.version,
+                'Built-By': System.getProperty('user.name'),
+                'Built-Date': new Date(),
+                'Source-Compatibility': project.sourceCompatibility)
     }
 }
 
@@ -58,24 +73,30 @@ dependencies {
     compile(group: 'com.google.guava', name: 'guava', version: '17.0')
 }
 
-task sourceJar(type: Jar) { from sourceSets.main.allJava }
-
-task wrapper(type: Wrapper) { gradleVersion = '2.2' }
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+    archiveClassifier = 'sources'
+}
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
-            artifact sourceJar { classifier "sources" }
+            artifact sourceJar
         }
     }
     repositories {
         maven {
-            credentials {
-                username artifactoryUsername
-                password artifactoryPassword
+            // Project specific maven repository in Gitlab.
+            url "https://gitlab.ebi.ac.uk/api/v4/projects/${gitlab_project_id}/packages/maven"
+            // Developer token in Gitlab.
+            credentials(HttpHeaderCredentials) {
+                name = "Private-Token"
+                value = project.ext.properties.gitlab_private_token
             }
-            url "http://ves-ebi-de:8081/artifactory/libs-release-local"
+            authentication {
+                header( HttpHeaderAuthentication )
+            }
         }
     }
 }
