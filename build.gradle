@@ -10,7 +10,7 @@ sourceCompatibility = 1.6
 targetCompatibility = 1.6
 
 version = '1.0.2'
-ext.gitlab_project_id ='1010'
+ext.gitlab_project_id ='1124'
 
 //jarsigner -storetype pkcs12 -keystore ENA.p12 build/libs/webin-file-uploader-1.0.1.jar "european molecular biology laboratory's godaddy.com, inc. id"
 // jarsigner -storetype pkcs12 -keystore ENA-2016.p12 build/libs/webin-file-uploader-1.0.1.jar "1"
