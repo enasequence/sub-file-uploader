@@ -26,9 +26,19 @@ case #3 -> OSX/Windows not using chrome -> applet wil launch.
 /**********************************************/
 /* To build and sign the jar then cvreate war */
 /**********************************************/
-1: gradlew clean jar
-2: jarsigner -storetype pkcs12 -keystore ENA-2016.p12 build/libs/webin-file-uploader-1.0.1.jar "1" (you will be prompted for passcode, enter pass1234)
-3: gradlew war
+1. gradlew clean jar
+
+2. Skip step 2-4 if you already have a valid .p12 keystore with valid certificate.
+2. Create a .p12 keystore with the private key used to obtain certificate(.pem/pkcs7) from certificate authority(goDaddy)
+   Note: please remember the password of keystore and passphrase of the privatekey
+3. To list all the keys in keystore
+    keytool -keystore ENA-2019.p12 -list -v
+4. Import the certificate obtained from goDaddy into keystore using the same alias as privateKey
+    keytool -importcert -noprompt -alias  codesigncert -file <something>-SHA2.pem -keystore ENA-2019.p12 -storepass pass1234
+
+5. sign the jar jarsigner -storetype pkcs12 -keystore ENA-2019.p12 sub-file-uploader/build/libs/webin-file-uploader-1.0.4.jar codesigncert(alias)
+
+6: gradlew war
 
 /*************/
 /* To deploy */
