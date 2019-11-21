@@ -58,6 +58,7 @@ jar {
         attributes(
                 'Implementation-Title': project.name,
                 'Implementation-Version': project.version,
+                'Permissions': 'all-permissions',
                 'Built-By': System.getProperty('user.name'),
                 'Built-Date': new Date(),
                 'Source-Compatibility': project.sourceCompatibility)
