@@ -27,7 +27,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPSClient;
 
 /**
  *
@@ -46,7 +46,7 @@ public class TransferOneFileThread extends Thread {
     private final int click;
     
     private MyTableModel mm;
-    private FTPClient client;
+    private FTPSClient client;
     private int tree;
     private MessageDigest md = null;
     private String MD5Path;
@@ -55,7 +55,7 @@ public class TransferOneFileThread extends Thread {
                             long size, 
                             int index, 
                             MyTableModel mm,
-                            FTPClient client,
+                            FTPSClient client,
                             int tree, 
                             int thread_idx) throws NoSuchAlgorithmException, FileNotFoundException {
         this.input_file = new File(path);
