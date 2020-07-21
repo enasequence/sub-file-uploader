@@ -22,7 +22,7 @@ import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.net.ftp.FTP;
-import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPSClient;
 
 /**
  *
@@ -31,13 +31,13 @@ import org.apache.commons.net.ftp.FTPClient;
 public class UploadOneFileThread extends Thread {
     
     private CountingInputStream c_in;
-    private FTPClient client;
+    private FTPSClient client;
     private final String filename;
     private final boolean binary;
     
     private boolean storeFile;
     
-    public UploadOneFileThread(InputStream in, String filename, FTPClient client, boolean binary) {
+    public UploadOneFileThread(InputStream in, String filename, FTPSClient client, boolean binary) {
         this.c_in = new CountingInputStream (in);
         this.filename = filename;
         this.client = client;

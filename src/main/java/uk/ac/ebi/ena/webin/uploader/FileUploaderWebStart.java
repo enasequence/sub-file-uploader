@@ -13,16 +13,16 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 import org.apache.commons.net.ftp.FTP;
-import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPSClient;
 
 public class FileUploaderWebStart extends JFrame implements FileUploaderI {
     private final static String MODE_UPLOAD = "upload";
     private final static String MODE_MD5 = "md5";
-    private String server = "webin.ebi.ac.uk";
+    private String server = "webin2.ebi.ac.uk";
     private int port = 21;
     private String mode = MODE_UPLOAD;
     private MyTableModel myTableModel = null;
-    private FTPClient ftpClient = null;
+    private FTPSClient ftpClient = null;
     private List<String> nameL = new ArrayList();
     private List<String> sizeL = new ArrayList();
     private List<String> dateL = new ArrayList();
@@ -87,7 +87,7 @@ public class FileUploaderWebStart extends JFrame implements FileUploaderI {
         jTable1.setModel(new MyTableModel());
         myTableModel = (MyTableModel)jTable1.getModel(); // prepare, initialize table model
         jTable1.getColumnModel().getColumn(5).setCellRenderer(new ProgressCellRenderer());
-        ftpClient = new FTPClient();
+        ftpClient = new FTPSClient();
         jLabelStatus.setText("");
         jCheckBoxOverwrite.setSelected(true);
         if (port == 8021)
@@ -308,14 +308,26 @@ public class FileUploaderWebStart extends JFrame implements FileUploaderI {
         }
         jLabelStatus.setText("Upload Selected");
         boolean login = false;
+        String username = null;
+        String pwd = null;
+        String msg = new String();
+        username = jTextField1.getText();
+        pwd = new String(jPasswordField1.getPassword());
         try {
+            ftpClient.setRemoteVerificationEnabled(true);
             ftpClient.connect(server, port);
-            login = ftpClient.login(jTextField1.getText(), new String(jPasswordField1.getPassword()));
+
+            login = ftpClient.login(username, pwd);
         } catch (IOException ex) {
+            msg = ex.getMessage()+"\n";
+            for(StackTraceElement e :ex.getStackTrace()) {
+                msg+=e.toString()+"\n";
+            }
             Logger.getLogger(FileUploaderApplet.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
         }
         if (!login) {
-            JOptionPane.showMessageDialog(this, "Login Incorrect!", "User Credentials Incorrect", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, msg+"\n\n<br/><br/>upd1: Login Incorrect!"+username+" -password:"+pwd, "User Credentials Incorrect", JOptionPane.ERROR_MESSAGE);
             return;
         }
         ftpClient.enterLocalPassiveMode();
