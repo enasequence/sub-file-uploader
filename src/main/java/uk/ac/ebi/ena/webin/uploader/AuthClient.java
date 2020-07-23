@@ -27,6 +27,6 @@ public class AuthClient {
         } catch (AuthException e) {
            return null;
         }
-        return (authResult != null && authResult.getAuthenticated() )? authResult.getLoginName() : null;
+        return (authResult != null && authResult.getAuthenticated() )? authResult.getLoginName().replace("WEBIN","Webin") : null;
     }
 }
