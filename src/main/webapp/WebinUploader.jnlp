@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- <jnlp spec="1.0+" codebase="https://www.ebi.ac.uk/ena/upload" href="WebinUploader.jnlp">
-
+<jnlp spec="1.0+" codebase="https://www.ebi.ac.uk/ena/upload" href="WebinUploader.jnlp">
+<!--
     <jnlp spec="1.0+" codebase="http://localhost:8080/ena/upload" href="WebinUploader.jnlp">
-    -->
-    <jnlp spec="1.0+" codebase="http://ves-hx-5b:8160/ena/upload" href="WebinUploader.jnlp">
 
+    <jnlp spec="1.0+" codebase="http://ves-hx-5b:8160/ena/upload" href="WebinUploader.jnlp">
+ -->
         <information>
             <title>WebinFileUploader</title>
             <vendor>European Nucleotide Archive(ENA)</vendor>
@@ -14,7 +14,7 @@
         </security>
         <resources>
             <j2se version="1.6+" />
-            <jar href= "webin-file-uploader-1.0.11.jar" main="true" />
+            <jar href= "webin-file-uploader-1.0.12.jar" main="true" />
         </resources>
         <application-desc main-class="uk.ac.ebi.ena.webin.uploader.FileUploaderWebStart">
             <argument>webin2.ebi.ac.uk</argument>
