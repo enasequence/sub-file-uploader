@@ -314,10 +314,13 @@ public class FileUploaderWebStart extends JFrame implements FileUploaderI {
         username = jTextField1.getText();
         pwd = new String(jPasswordField1.getPassword());
         try {
-            ftpClient.setRemoteVerificationEnabled(true);
-            ftpClient.connect(server, port);
+            username = new AuthClient().getWebinAccount(username, pwd);
+            if(username != null) {
+                ftpClient.setRemoteVerificationEnabled(true);
+                ftpClient.connect(server, port);
 
-            login = ftpClient.login(username, pwd);
+                login = ftpClient.login(username, pwd);
+            }
         } catch (IOException ex) {
             msg = ex.getMessage()+"\n";
             for(StackTraceElement e :ex.getStackTrace()) {
@@ -327,7 +330,7 @@ public class FileUploaderWebStart extends JFrame implements FileUploaderI {
             ex.printStackTrace();
         }
         if (!login) {
-            JOptionPane.showMessageDialog(this, msg+"\n\n<br/><br/>upd1: Login Incorrect!"+username+" -password:"+pwd, "User Credentials Incorrect", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, msg+"\n\n<br/><br/>upd1: Login Incorrect!", "User Credentials Incorrect", JOptionPane.ERROR_MESSAGE);
             return;
         }
         ftpClient.enterLocalPassiveMode();
