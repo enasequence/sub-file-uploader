@@ -9,7 +9,7 @@ group = 'uk.ac.ebi.webin-file-uploader'
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 
-version = '1.0.5'
+version = '1.0.14'
 ext.gitlab_project_id ='1124'
 
 //jarsigner -storetype pkcs12 -keystore ENA.p12 build/libs/webin-file-uploader-1.0.1.jar "european molecular biology laboratory's godaddy.com, inc. id"
@@ -46,6 +46,7 @@ repositories {
 
 
 jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from {
         configurations.compile.collect {
             it.isDirectory() ? it : zipTree(it)
@@ -66,12 +67,13 @@ jar {
 }
 
 war {
-    from 'build/libs/webin-file-uploader-1.0.1.jar'
+    from 'build/libs/webin-file-uploader-1.0.14.jar'
 }
 
 dependencies {
-    compile(group: 'commons-net', name: 'commons-net', version: '3.0.1')
+    compile(group: 'commons-net', name: 'commons-net', version: '3.4')
     compile(group: 'com.google.guava', name: 'guava', version: '17.0')
+    compile(group: 'uk.ac.ebi.ena.ena-authentication', name: 'ena-authentication-client', version: '1.9.3')
 }
 
 task sourceJar(type: Jar) {
