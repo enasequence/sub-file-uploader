@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 import javax.swing.*;
 
 import org.apache.commons.net.ftp.FTP;
-import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPSClient;
 
 /**
  *
@@ -39,10 +39,10 @@ import org.apache.commons.net.ftp.FTPClient;
  */
 public class FileUploaderApplet extends javax.swing.JApplet implements FileUploaderI {
     private final String version = "0.9.5";
-    private String the_addr = "webin.ebi.ac.uk";
+    private String the_addr = "webin2.ebi.ac.uk";
     private int the_port = 21;
     private MyTableModel the_model = null;
-    private FTPClient the_client = null;
+    private FTPSClient the_client = null;
     private ArrayList name = new ArrayList();
     private ArrayList size = new ArrayList();
     private ArrayList date = new ArrayList();
@@ -99,7 +99,8 @@ public class FileUploaderApplet extends javax.swing.JApplet implements FileUploa
         this.jTable1.setModel(new MyTableModel());
         this.the_model = (MyTableModel)this.jTable1.getModel(); // prepare, initialize table model
         this.jTable1.getColumnModel().getColumn(5).setCellRenderer(new ProgressCellRenderer());
-        this.the_client = new FTPClient();
+        this.the_client = new FTPSClient();
+        this.the_client.setRemoteVerificationEnabled(true);
         this.jLabel4.setText("");
         
         /* Read Parameters, if there are any: server, Port, Buttons */
@@ -370,7 +371,7 @@ public class FileUploaderApplet extends javax.swing.JApplet implements FileUploa
             return;
         }
         
-       this.jLabel3.setText("Upload Selected");        
+       this.jLabel3.setText("Upload Selected");
         
         // Upload Code
         if (this.jTextField1.getText().length() == 0 || this.jPasswordField1.getPassword().length == 0) {
@@ -380,14 +381,22 @@ public class FileUploaderApplet extends javax.swing.JApplet implements FileUploa
         this.jLabel4.setText("Upload Selected");
 
         boolean login = false;
+        String username = null;
+        String pwd = null;
         try {
-            this.the_client.connect(the_addr, the_port);
-            login = this.the_client.login(this.jTextField1.getText(), new String(this.jPasswordField1.getPassword()));
+            username = this.jTextField1.getText();
+            pwd = new String(this.jPasswordField1.getPassword());
+            username = new AuthClient().getWebinAccount(username, pwd);
+            if(username != null) {
+                the_client.setRemoteVerificationEnabled(true);
+                the_client.connect(the_addr, the_port);
+                login = the_client.login(username, pwd);
+            }
         } catch (IOException ex) {
             Logger.getLogger(FileUploaderApplet.class.getName()).log(Level.SEVERE, null, ex);
         }
         if (!login) {
-            JOptionPane.showMessageDialog(this, "Login Incorrect!", "User Credentials Incorrect", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Login Incorrect!" , "User Credentials Incorrect", JOptionPane.ERROR_MESSAGE);
             return;
         }
         this.the_client.enterLocalPassiveMode();

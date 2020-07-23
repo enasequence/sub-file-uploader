@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPSClient;
 import org.apache.commons.net.ftp.FTPFile;
 
 import javax.swing.*;
@@ -38,10 +38,10 @@ public class TransferClient implements Runnable {
     private int[] indicesA;
     private FileUploaderI fileUploader;
     private String path;
-    private FTPClient ftpClient;
+    private FTPSClient ftpClient;
     private long totalSize;
 
-    public TransferClient(String[] filesA, long[] sizesA, int[] indicesA, FileUploaderI fileUploader, String path, FTPClient ftpClient) {
+    public TransferClient(String[] filesA, long[] sizesA, int[] indicesA, FileUploaderI fileUploader, String path, FTPSClient ftpClient) {
         jProgressBar = fileUploader.getJProgressBar();
         jProgressBar.setMinimum(0);
         jProgressBar.setMaximum(1000);
