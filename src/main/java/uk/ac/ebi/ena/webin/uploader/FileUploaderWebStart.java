@@ -330,7 +330,7 @@ public class FileUploaderWebStart extends JFrame implements FileUploaderI {
             ex.printStackTrace();
         }
         if (!login) {
-            JOptionPane.showMessageDialog(this, msg+"\n\n<br/><br/>upd1: Login Incorrect!", "User Credentials Incorrect", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, msg+"Incorrect Username/Password!", "User Credentials Incorrect", JOptionPane.ERROR_MESSAGE);
             return;
         }
         ftpClient.enterLocalPassiveMode();

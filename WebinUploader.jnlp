@@ -9,7 +9,7 @@
     <resources>
         <!-- Application Resources -->
         <j2se version="1.6+" />
-        <jar href= "webin-file-uploader-1.0.12.jar" main="true" />
+        <jar href= "webin-file-uploader-1.0.14.jar" main="true" />
     </resources>
     <applet-desc
             name="WebinFileUploader"
