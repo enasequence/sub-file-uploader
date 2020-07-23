@@ -384,16 +384,19 @@ public class FileUploaderApplet extends javax.swing.JApplet implements FileUploa
         String username = null;
         String pwd = null;
         try {
-            the_client.setRemoteVerificationEnabled(true);
-            the_client.connect(the_addr, the_port);
             username = this.jTextField1.getText();
             pwd = new String(this.jPasswordField1.getPassword());
-            login = the_client.login(username, pwd);
+            username = new AuthClient().getWebinAccount(username, pwd);
+            if(username != null) {
+                the_client.setRemoteVerificationEnabled(true);
+                the_client.connect(the_addr, the_port);
+                login = the_client.login(username, pwd);
+            }
         } catch (IOException ex) {
             Logger.getLogger(FileUploaderApplet.class.getName()).log(Level.SEVERE, null, ex);
         }
         if (!login) {
-            JOptionPane.showMessageDialog(this, "Login Incorrect! uname:"+username+"-pwd:"+pwd, "User Credentials Incorrect", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Login Incorrect!" , "User Credentials Incorrect", JOptionPane.ERROR_MESSAGE);
             return;
         }
         this.the_client.enterLocalPassiveMode();
