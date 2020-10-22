@@ -1,17 +1,16 @@
 package uk.ac.ebi.ena.webin.uploader;
 
-import uk.ac.ebi.ena.authentication.client.AuthenticationClient;
-import uk.ac.ebi.ena.authentication.client.AuthenticationClientImpl;
-import uk.ac.ebi.ena.authentication.exception.AuthException;
-import uk.ac.ebi.ena.authentication.model.AuthRealm;
-import uk.ac.ebi.ena.authentication.model.AuthResult;
+
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import uk.ac.ebi.ena.webinauth.AuthenticationApiApi;
+import uk.ac.ebi.ena.webinauth.client.WebinAuthConstants;
+import uk.ac.ebi.ena.webinauth.client.model.AuthRequest;
+import uk.ac.ebi.ena.webinauth.client.model.AuthRequest.AuthRealmsEnum;
+import uk.ac.ebi.ena.webinauth.client.model.AuthResponse;
 
 public class AuthClient {
-
-    private static final String AUTH_SERVICE_URL =  "https://www.ebi.ac.uk/ena/auth";
 
     String getWebinAccount(String userName, String password) {
         if(userName == null)
@@ -19,14 +18,18 @@ public class AuthClient {
         if(userName.startsWith("Webin")){
             return userName;
         }
-        AuthResult authResult;
+        AuthResponse authResponse;
         try {
-            AuthenticationClient authClient = new AuthenticationClientImpl(AUTH_SERVICE_URL);
-            authResult = authClient.sessionlessLogin(userName, password,
-                    new ArrayList<AuthRealm>(Arrays.asList(AuthRealm.EGA, AuthRealm.SRA)));
-        } catch (AuthException e) {
-           return null;
+            AuthenticationApiApi api = new AuthenticationApiApi();
+            api.getApiClient().setBasePath(WebinAuthConstants.PROD_AUTH_URL);
+            AuthRequest authRequest=new AuthRequest();
+            authRequest.setUsername(userName);
+            authRequest.setPassword(password);
+            authRequest.setAuthRealms(new ArrayList<AuthRealmsEnum>(Arrays.asList(AuthRealmsEnum.EGA, AuthRealmsEnum.ENA)));
+            authResponse = api.login(authRequest);
+        } catch (Exception e) {
+            return null;
         }
-        return (authResult != null && authResult.getAuthenticated() )? authResult.getLoginName().replace("WEBIN","Webin") : null;
+        return (authResponse != null && authResponse.getAuthenticated() )? authResponse.getLoginName().replace("WEBIN","Webin") : null;
     }
 }
