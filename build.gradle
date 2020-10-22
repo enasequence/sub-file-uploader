@@ -73,7 +73,7 @@ war {
 dependencies {
     compile(group: 'commons-net', name: 'commons-net', version: '3.4')
     compile(group: 'com.google.guava', name: 'guava', version: '17.0')
-    compile(group: 'uk.ac.ebi.ena.ena-authentication', name: 'ena-authentication-client', version: '1.9.3')
+    compile(group: 'uk.ac.ebi.ena', name: 'webin-auth-sdk', version: '1.0.0')
 }
 
 task sourceJar(type: Jar) {
