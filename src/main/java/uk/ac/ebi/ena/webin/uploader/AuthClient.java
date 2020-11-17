@@ -30,6 +30,12 @@ public class AuthClient {
         } catch (Exception e) {
             return null;
         }
-        return (authResponse != null && authResponse.getAuthenticated() )? authResponse.getLoginName().replace("WEBIN","Webin") : null;
+
+        if(authResponse != null && authResponse.getAuthenticated()){
+            return (userName.startsWith("su-Webin") || userName.startsWith("mg-Webin"))
+                ? userName
+                : authResponse.getLoginName().replace("WEBIN","Webin");
+        }
+        return null;
     }
 }
