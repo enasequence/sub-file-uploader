@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jnlp spec="1.0+" codebase="https://enasequence.github.io/sub-file-uploader/" href="WebinUploader.jnlp">
+<jnlp spec="1.0+" codebase="https://enasequence.github.io/sub-file-uploader" href="WebinUploader.jnlp">
 <!--
     <jnlp spec="1.0+" codebase="http://localhost:8080/ena/upload" href="WebinUploader.jnlp">
 
