@@ -14,7 +14,7 @@
         </security>
         <resources>
             <j2se version="1.6+" />
-            <jar href= "webin-file-uploader.jar" main="true" />
+            <jar href= "releases/download/1.0.16/webin-file-uploader-1.0.16.jar" main="true" />
         </resources>
         <application-desc main-class="uk.ac.ebi.ena.webin.uploader.FileUploaderWebStart">
             <argument>webin2.ebi.ac.uk</argument>
