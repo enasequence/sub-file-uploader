@@ -1,23 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- href attribute contains relative path;
-     codebase attribute not specified -->
-<jnlp href="WebinFileUploader.jnlp">
-    <information>
-        <title>WebinFileUploader</title>
-        <vendor>European Nucleotide Archive(ENA)</vendor>
-    </information>
-    <resources>
-        <!-- Application Resources -->
-        <j2se version="1.6+" />
-        <jar href= "webin-file-uploader-1.0.15.jar" main="true" />
-    </resources>
-    <applet-desc
-            name="WebinFileUploader"
-            main-class="uk.ac.ebi.ena.webin.uploader.WebinFileUploader"
-            width="1000"
-            height="600">
-                <param name="server" value="webin2.ebi.ac.uk"/>
-                <param name="port" value="21"/>
-    </applet-desc>
-    <update check="background"/>
-</jnlp>
+<jnlp spec="1.0+" codebase="https://enasequence.github.io/sub-file-uploader" href="WebinUploader.jnlp">
+<!--
+    <jnlp spec="1.0+" codebase="http://localhost:8080/ena/upload" href="WebinUploader.jnlp">
+
+    <jnlp spec="1.0+" codebase="http://ves-hx-5b:8160/ena/upload" href="WebinUploader.jnlp">
+ -->
+        <information>
+            <title>WebinFileUploader</title>
+            <vendor>European Nucleotide Archive(ENA)</vendor>
+        </information>
+        <security>
+            <all-permissions/>
+        </security>
+        <resources>
+            <j2se version="1.6+" />
+            <jar href= "webin-file-uploader.jar" main="true" />
+        </resources>
+        <application-desc main-class="uk.ac.ebi.ena.webin.uploader.FileUploaderWebStart">
+            <argument>webin2.ebi.ac.uk</argument>
+            <argument>21</argument>
+            <argument>upload</argument>
+        </application-desc>
+        <update check="background"/>
+    </jnlp>
