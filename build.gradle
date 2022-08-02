@@ -62,7 +62,8 @@ jar {
                 'Permissions': 'all-permissions',
                 'Built-By': System.getProperty('user.name'),
                 'Built-Date': new Date(),
-                'Source-Compatibility': project.sourceCompatibility)
+                'Source-Compatibility': project.sourceCompatibility,
+                'Main-Class': 'uk.ac.ebi.ena.webin.uploader.FileUploaderWebStart')
     }
 }
 
