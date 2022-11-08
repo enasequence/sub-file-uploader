@@ -1,38 +1,56 @@
-The file SRA file upload is a java web start swing application using the signed certificate.
-Currently deployed https://enasequence.github.io/sub-file-uploader/WebinUploader.jnlp
+# Sub file uploader
 
-Possible user experience while running WebinUploader.jnlp:
+The SRA file uploader is a java web start swing application deployed using the signed certificate.
 
-Case #1 User is on OSX and is using Chrome -> Warning msg is displayed advising them to use another browser as applet and webstart will not launch. Webstart will launch after if and when we have Apple developer Id that will allow us the sign the jar for OSX.
+Currently deployed in https://enasequence.github.io/sub-file-uploader/WebinUploader.jnlp
 
-Case #2 -> Windows OS using Chrome -> Webstart will launch.
+#Possible user experience while running WebinUploader.jnlp:
 
-case #3 -> OSX/Windows not using chrome -> applet will launch.
+1. User is on OSX and is using Chrome -> Warning msg is displayed advising them to use another browser as applet and webstart will not launch. Webstart will launch after if and when we have Apple developer Id that will allow us the sign the jar for OSX.
 
-/**********************************************/
-/* To build and sign the jar then cvreate war */ENA
-/**********************************************/
+2. Windows OS using Chrome -> Webstart will launch.
+
+3. OSX/Windows not using chrome -> applet will launch.
+
+#To create a certificate
+1. Create a CSR file and privatekey using the below command. The CSR file must contain the details as per this document https://intranet.ebi.ac.uk/article/requesting-ssl-certificates
+
+   `openssl req -newkey rsa:2048 -keyout privatekey.key -out openssl-ena.csr` 
+
+   Note: The privatekey.key will be used for sining the jar
+
+2. Create a service now ticket in (https://embl.service-now.com/) and attach the openssl-ena.csr file. This file will be used by IT service to get the certificate from certificate authority.
+
+3. After IT request, it will take some time to get the link to the certificate from the IT team.
+
+#To build and sign the jar 
+
 1. gradlew clean jar
-2. Create a .p12 keystore with the private key used to obtain certificate(.pem/pkcs7) from certificate authority(goDaddy)
-   Note: please remember the password of keystore and ./gradlew of the privatekey
-3. To list all the keys in keystore
-   keytool -keystore ENA-2019.p12 -list -v
+2. Create a .p12 keystore using private key (used to obtain certificate) and the certificate received from certificate authority
+
+   Note: please remember the password of keystore
+
+   `openssl pkcs12 -export -in cert/ena_ebi_2022_08_Nov.pem -inkey cert/privatekey.key -name codesigncert -out ENA-2022.p12`
+
    [ Enter Keystore password  ]
-4. Import the certificate obtained from goDaddy into keystore using the same alias as privateKey
-   keytool -importcert -noprompt -alias  codesigncert -file <something>-SHA2.pem -keystore ENA-2019.p12 -storepass pass1234
-   [ Enter key password for <codesigncert> ]
 
-5. sign the jar jarsigner -storetype pkcs12 -keystore ENA-2019.p12 sub-file-uploader/build/libs/webin-file-uploader-1.0.4.jar codesigncert(alias)
+3. Sign the jar using the below command
 
-/*************/
-/* To deploy */
-/*************/
+   `jarsigner -storetype pkcs12 -keystore ENA-2022.p12 build/libs/webin-file-uploader-1.0.17.jar codesigncert(alias)`
+4. To verify the jar validity use the below command
 
-1: Create a new webin-file-uploader.jar and sign it using the above process
-2: Create a git tag
-3: Release the new jar in github
-4: Update the WebinUploader.jnlp to point to new jar in the github release directory
-5: Commit and push WebinUploader.jnlp 
+   `jarsigner -verify -verbose -certs build/libs/webin-file-uploader-1.0.17.jar`
+
+
+# To deploy sub-file-uploader
+
+webin-file-uploader.jar is deployed in git hub.
+
+1. Create a new webin-file-uploader.jar and sign it using the above process
+2. Create a git tag
+3. Release the new jar in github
+4. Update the WebinUploader.jnlp to point to new jar in the github release directory
+5. Commit and push WebinUploader.jnlp 
 
 
 
