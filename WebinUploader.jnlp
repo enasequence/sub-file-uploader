@@ -2,7 +2,7 @@
 <jnlp spec="1.0+" codebase="https://enasequence.github.io/sub-file-uploader" href="WebinUploader.jnlp">
         <information>
             <title>WebinFileUploader</title>
-            <vendor>European Nucleotide Archive(ENA)</vendor>
+            <vendor>European Bioinformatics Institute</vendor>
         </information>
         <security>
             <all-permissions/>
