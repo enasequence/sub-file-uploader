@@ -9,7 +9,7 @@
         </security>
         <resources>
             <j2se version="1.6+" />
-            <jar href= "https://github.com/enasequence/sub-file-uploader/releases/download/1.0.18/webin-file-uploader-1.0.18.jar" main="true" />
+            <jar href= "https://github.com/enasequence/sub-file-uploader/releases/download/1.0.19/webin-file-uploader-1.0.19.jar" main="true" />
         </resources>
         <application-desc main-class="uk.ac.ebi.ena.webin.uploader.FileUploaderWebStart">
             <argument>webin2.ebi.ac.uk</argument>
