@@ -30,16 +30,24 @@ Currently deployed in https://enasequence.github.io/sub-file-uploader/WebinUploa
 
    Note: please remember the password of keystore
 
-   `openssl pkcs12 -export -in cert/ena_ebi_2022_08_Nov.pem -inkey cert/privatekey.key -name codesigncert -out ENA-2022.p12`
+   `openssl pkcs12 -nodes -export -in cert/ena-certificate.pem -inkey cert/privatekey.key -certfile cert/cs_cert_root_inter.cer -out ENA-2022.p12 -name codesigncert` 
+
+   [ Enter Keystore password  ]
+3. Create java keystore
+
+   `keytool -importkeystore -srckeystore ENA-2022.p12 -srcstoretype pkcs12 -destkeystore cert/keystore.jks`
 
    [ Enter Keystore password  ]
 
-3. Sign the jar using the below command
+4. Sign the jar using the below command
 
-   `jarsigner -storetype pkcs12 -keystore ENA-2022.p12 build/libs/webin-file-uploader-1.0.17.jar codesigncert(alias)`
-4. To verify the jar validity use the below command
+   `jarsigner -tsa http://timestamp.comodoca.com -keystore cert/keystore.jks build/libs/webin-file-uploader-1.0.17.jar codesigncert(alias)`
+
+5. To verify the jar validity use the below command. Do this and check if you get any warnings.
 
    `jarsigner -verify -verbose -certs build/libs/webin-file-uploader-1.0.17.jar`
+
+
 
 
 # To deploy sub-file-uploader
@@ -51,6 +59,11 @@ webin-file-uploader.jar is deployed in git hub.
 3. Release the new jar in github
 4. Update the WebinUploader.jnlp to point to new jar in the github release directory
 5. Commit and push WebinUploader.jnlp 
+
+Note: Sometimes the updated WebinUploader.jnlp and the jar files are not reflected in the downloaded WebinUploader.jnlp (https://enasequence.github.io/sub-file-uploader/WebinUploader.jnlp).
+This will be confusing because our changes might not reflect.
+
+
 
 
 

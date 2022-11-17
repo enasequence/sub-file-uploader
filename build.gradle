@@ -9,15 +9,8 @@ group = 'uk.ac.ebi.webin-file-uploader'
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 
-version = '1.0.17'
+version = '1.0.21'
 ext.gitlab_project_id ='1124'
-
-//jarsigner -storetype pkcs12 -keystore ENA.p12 build/libs/webin-file-uploader-1.0.1.jar "european molecular biology laboratory's godaddy.com, inc. id"
-// jarsigner -storetype pkcs12 -keystore ENA-2016.p12 build/libs/webin-file-uploader-1.0.1.jar "1"
-//pass1234
-// codesign -f -s "Mac Developer: Iain Cleland (J4BA848P6H)" sclear
-// certutil
-// rc/main/webapp/WebinUploader.jnlp
 
 
 wrapper{
